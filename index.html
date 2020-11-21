@@ -1,26 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Welcome to CYF Chat</title>
-  </head>
-  <body>
-    <h1>
-      CYF Chat
-    </h1>
-    <h2>
-      Send a message
-    </h2>
-    <form action="/messages" method="post">
-      <p>
-        Name: <input type="text" name="from" placeholder="Your Name" /> <br />
-        Message: <input type="text" name="text" placeholder="The message..." />
-        <br />
-      </p>
-      <button type="submit">
-        Send
-      </button>
-    </form>
 
-    <a href="/messages">See all messages</a>
-  </body>
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thony Chat App</title>
+</head>
+
+<body>
+  <div class="container p-4">
+    <div class="jumbotron jumbotron-fluid text-center m-4 rounded p-4">
+      <div class="container">
+        <h1 class="display-4" style="font-size: 2rem;">Earth Mars Chat</h1>
+        <p class="lead m-0">The interplanetary chat app</p>
+      </div>
+    </div>
+
+    <!-- SCROLL -->
+    <div class="col-12">
+      <div id="chatBox" class="col-md-4 col-11 mx-auto mt-4 rounded border border-info"
+        style="overflow: scroll; height: 400px;">
+      </div>
+    </div>
+    <!-- SCROLL -->
+
+    <div class="col-md-4 col-11 mx-auto mt-4">
+      <form action="/messages" method="post">
+        <div class="form-group">
+          <!-- <label for="from">From</label> -->
+          <input type="text" class="form-control" id="from" aria-describedby="emailHelp" placeholder="Your name" />
+        </div>
+        <div class="form-group d-flex">
+          <!-- <label for="text">Message</label> -->
+          <input type="text" class="col-9 form-control" id="text" placeholder="Message..." />
+          <button id="button" type="submit" class="col-3 btn btn-info w-100">
+            Send
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="rowmt-4">
+      <div class="col-md-4 col-11 mx-auto mt-4">
+        <ul class="list-group pt-4">
+          <li class="list-group-item active bg-light border-secondary text-center text-dark">
+            Available endpoints
+          </li>
+          <li class="list-group-item">get "/"</br>(HOME)</li>
+          <li class="list-group-item">get "/messages"</br>(All messages)</li>
+          <li class="list-group-item">post "/messages"</br>(Post a message)</li>
+          <li class="list-group-item">get "/messages/latest"</br>(Check last message)</li>
+          <li class="list-group-item">get "/messages/search"</br>(Search messages by a criteria)</li>
+          <li class="list-group-item">get "/messages/:messageIdUrl"</br>(Search messages by an ID)</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+  <script>
+
+    let messagesLocalDb = [];
+    let textFrom = "";
+    let textMessage = "";
+
+    window.addEventListener('load', (e) => {
+      loadMessages(e);
+    });
+
+    const loadMessages = (e) => {
+      document.getElementById("chatBox").innerHTML = "";
+      let url = `${e.currentTarget.origin}/messages`;
+
+
+      setInterval(async function get() {
+        try {
+          const res = await fetch(url);
+          const data = await res.json();
+          data.forEach(element => {
+            if (messagesLocalDb.includes(element.id) == false) {
+              messagesLocalDb.push(element.id);
+              let messageBox = document.createElement("div");
+              messageBox.innerHTML = `<p class="m-2 py-2 px-4 bg-light rounded ">
+                <strong>${element.from}</strong>: ${element.text}</p>`;
+              document.getElementById("chatBox").appendChild(messageBox);
+              document.getElementById("chatBox").scrollTop += 50;
+            }
+          });
+        } catch (err) {
+          console.error('err', err);
+        }
+      }, 3000);
+
+    };
+
+    document.getElementById("from").addEventListener("change", (e) => {
+      textFrom = e.target.value;
+      // console.log(textFrom);
+    });
+
+    document.getElementById("text").addEventListener("change", (e) => {
+      textMessage = e.target.value;
+      // console.log(textMessage);
+    });
+
+    document.getElementById("button").addEventListener("click", (e) => {
+      e.preventDefault();
+
+      const data = {
+        from: textFrom,
+        text: textMessage,
+      };
+
+      let url = `${e.view.location.origin}/messages`;
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Success:", data);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    });
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+</body>
+
 </html>

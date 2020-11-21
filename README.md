@@ -84,7 +84,7 @@ What to do now:
 For this level, your server must:
 
 - [ ] _reject_ requests to create messages if the message objects have an empty or missing `text` or `from` property.
-  - [ ] In this case your server should return a status code of `400`.
+- [ ] In this case your server should return a status code of `400`.
 
 (Advanced note: people don't actually agree on the best status code for this situation.)
 
